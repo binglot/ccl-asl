@@ -116,7 +116,7 @@ class AslDb:
         else:
             # is embedded
             str_bytes = struct.pack(">Q", val)
-            str_len = str_bytes[0] & 0x7F
+            str_len = ord(str_bytes[0]) & 0x7F
             string = str_bytes[1:1+str_len].decode()
         return string
 
@@ -246,7 +246,13 @@ def main():
     if output_type == "tsv":
         if output_location:
             file_mode = "a" if append_data else "w"
-            out_f = open(output_location, file_mode, encoding="utf-8")
+            # for backwards compatibility - "encoding" parameter won't work in Python 2.7
+            try:
+                out_f = open(output_location, file_mode, encoding="utf-8")
+            except:
+                pass
+            if not out_f:
+                out_f = open(output_location, file_mode)
         else:
             out_f = sys.stdout
 
